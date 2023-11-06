@@ -256,9 +256,10 @@ class Login:
                 await page.close()
                 return a
 
-# def main():
-#     login = Login()
-#     asyncio.run(login.run())
-#
-# main()
-#
+def main():
+    login = Login(username = '18812346688',
+            password = '6677xx')
+    asyncio.run(login.run())
+
+main()
+

@@ -1,57 +1,14 @@
 import asyncio
 import sys
-import time
-
 from pyppeteer import connect
 import pandas as pd
 import os
 import datetime
 import random
 
-# async def wait_loading(page, _xpath_for_row):
-#     has_finished_loading = False
-#     loop_counter = 0  # 添加计数器
-#     max_retries = 50  # 设置最大重试次数
-#     timeout = 2  # 设置超时时间为2秒
-#
-#     try:
-#         await asyncio.wait_for(_wait_loading_inner(page, _xpath_for_row, has_finished_loading, loop_counter, max_retries), timeout)
-#     except asyncio.TimeoutError:
-#         print("尝试加载数据超时。")
-#
-# async def _wait_loading_inner(page, _xpath_for_row, has_finished_loading, loop_counter, max_retries):
-#     while True:
-#         # 检查加载动画
-#         loading_element = await page.xpath('//div[contains(@class, "ant-spin-spinning")]')
-#         if loading_element:
-#             print("正在加载数据...")  # 打印提示信息
-#             has_finished_loading = True
-#             await asyncio.sleep(0.01)  # 避免CPU过载
-#             loop_counter += 1  # 增加计数器的值
-#             if loop_counter >= max_retries:  # 检查是否超过最大重试次数
-#                 print("尝试加载数据超时。")
-#                 break
-#             continue
-#         elif has_finished_loading:
-#             # 检查数据行数
-#             row_elements = await page.xpath(_xpath_for_row)
-#             current_count = len(row_elements)
-#             print(f"当前已加载 {current_count} 条数据。")  # 打印当前加载的数据行数
-#             time.sleep(1.5)
-#             if current_count >= 501:
-#                 print("数据超过501条，暂停执行。")
-#                 return
-#             break
-#         else:
-#             await asyncio.sleep(0.01)  # 避免CPU过载
-
 async def get_data_row_key(page, row_element):
     data_row_key = await page.evaluate('(element) => element.getAttribute("data-row-key")', row_element)
     return data_row_key
-
-import asyncio
-import pandas as pd
-import sys
 
 async def pull_down_until_end(page, _xpath_for_table, _xpath_for_row):
     _pre_lst_len = 0

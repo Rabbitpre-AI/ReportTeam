@@ -1,12 +1,9 @@
 import asyncio
 import time
-from pyppeteer import connect
 import pandas as pd
-import os
-from datetime import datetime
-import random
 import re
-class DataExtractor:
+from pyppeteer import connect
+class Blogger_detail:
     def __init__(self, page):
         self.page = page
 
@@ -755,8 +752,12 @@ class DataExtractor:
 
         for _plate in selected_plate:
             postfix = self.page.url.split('/')[-1]
+            # print(postfix)
             xpath_for_plate_btn = f'//*[@id="rc-tabs-0-tab-/d/account/{_plate}/{postfix}"]'
+            # print(xpath_for_plate_btn)
+            await self.page.waitForXPath(xpath_for_plate_btn, timesout = 10000)
             _plate_btn_elements = await self.page.xpath(xpath_for_plate_btn)
+            # print(_plate_btn_elements)
             _plate_btn = _plate_btn_elements[0]
             aria_selected = await self.page.evaluate('(btn) => btn.getAttribute("aria-selected")', _plate_btn)
 
@@ -764,8 +765,8 @@ class DataExtractor:
                 await _plate_btn.click()
                 await asyncio.sleep(1)
 
+            final_data['个人信息'] = await self.personal_data()
             if _plate == 'overview':
-                final_data['个人信息'] = await self.personal_data()
                 final_data['账号概览'] = await self.extract_overview_data()
                 final_data['账号概览-趋势表现'] = await self.overview_fans_trends()
             elif _plate == 'worksAnalysis':
@@ -790,45 +791,12 @@ class DataExtractor:
                 final_data['品类商品-品类推广明细'] = await self.get_category_promotion_detail()
         return final_data
 
-
-# Usage:
-async def main():
-    browser = await connect(browserURL='http://127.0.0.1:9222', defaultViewport=None)
-    # 获取所有打开的页面
-    pages = await browser.pages()
-    if not pages:
-        print("没有找到已打开的页面。")
-        return
-        # 选择第一个页面
-    page = pages[0]  # add other plates if needed
-    df = pd.read_excel('test1.xlsx',sheet_name = 'Sheet1')
-    names = df['名字']
-    urls = df['url']
-    # 设置您想要创建的目录的名称
-    folder_name = '新快-医生账号数据'
-    # 当前文件的绝对路径
-    current_directory = os.getcwd()
-    current_date = datetime.now().strftime('%Y-%m-%d')
-    random_number = random.randint(0, 1000)
-    for i in range(224,271):
-        url = urls[i]
-        # number = url.split("/")[-1]
-        # new_url = 'http://47.98.199.94:50888/d/account/overview/'+number
-        print(f'当前在执行第{i}个url{url}，名为{names[i]}')
-        await page.goto(url)
-        await asyncio.sleep(2)
-        extractor = DataExtractor(page)
-        final_data  = await extractor.get_account_info(['fanPortrait'])
-
-        folder_path = os.path.join(current_directory, folder_name)
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-
-        excel_path = os.path.join(folder_path, f'output_快手{names[i]}{current_date}-第{i}个-{random_number}.xlsx')
-
-        with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
-            for sheet_name, df in final_data.items():
-                df.to_excel(writer, sheet_name=sheet_name)
-        print(f'数据保存在{excel_path}')
-
-asyncio.run(main())
+# async def main():
+#     browser = await connect(browserURL='http://127.0.0.1:9222', defaultViewport=None)
+#     pages = await browser.pages()
+#     page = pages[0]
+#     data = Blogger_detail(page)
+#     final_data = await data.get_account_info(selected_plate=['overview'])
+#     print(final_data)
+#
+# asyncio.run(main())
